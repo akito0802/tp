@@ -5,6 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>スケール指板ビューア</title>
   <link rel="stylesheet" href="style.css" />
+<style id='force-blue-melon'>
+
+/* === FORCE OVERRIDE: Blue theme + Melon Soda select === */
+:root{
+  --blue-1:#e5f4fb; --blue-2:#d0ecf7; --blue-3:#98cfe3; --blue-accent:#048db7;
+  --bg:var(--blue-1); --surface:#ffffff; --panel:var(--blue-2); --panel-2:var(--blue-3);
+  --text:#0b1220; --muted:#3c5363; --accent:var(--blue-accent); --outline:#98cfe3;
+  --root:#ff8f3a; --note:#36b4d6; --tension:#7abfe0; --fret:#b5d7e5; --string:#8fbfd4; --row:#ffffff;
+}
+html,body{ background: var(--bg) !important; }
+header{ background: var(--panel) !important; border-bottom: 1px solid var(--outline) !important; }
+.controls,.tension-panel{ background: var(--panel) !important; border:1px solid var(--outline) !important; border-radius:12px !important; }
+#fretboard{ background: var(--row) !important; border:1px solid var(--outline) !important; }
+.table{ background: var(--row) !important; border:1px solid var(--outline) !important; }
+.table th{ background: var(--panel) !important; color: var(--muted) !important; }
+.badge{ background: #fff !important; border:1px solid var(--outline) !important; }
+.badge-root{ background: #fee2c5 !important; color:#7a3e00 !important; }
+.badge-scale{ background: #dbeafe !important; color:#1e40af !important; }
+.badge-tension{ background: #ede9fe !important; color:#5b21b6 !important; }
+
+/* Melon Soda select */
+select{
+  background-color:#d4f9e1 !important;
+  border:2px solid #4ac58a !important;
+  color:#2d6a4f !important;
+  padding:8px 12px !important;
+  border-radius:16px !important;
+  font-size:15px !important;
+  font-family:"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif !important;
+  box-shadow: inset 0 1px 4px rgba(255,255,255,0.6), 0 3px 6px rgba(0,0,0,0.08) !important;
+  appearance:none !important;
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234ac58a' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 10px center !important;
+  background-size:12px 8px !important;
+  transition: background-color .2s, box-shadow .2s !important;
+}
+select:focus{
+  outline:none !important;
+  background-color:#c2f5d7 !important;
+  box-shadow: inset 0 1px 6px rgba(255,255,255,0.7), 0 4px 10px rgba(74,197,138,0.3) !important;
+}
+
+</style>
 </head>
 <body>
   <header>
