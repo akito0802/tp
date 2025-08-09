@@ -132,10 +132,7 @@ const SCALE_THEORY = {
   const onReady = (fn)=> document.readyState !== 'loading' ? fn() : document.addEventListener('DOMContentLoaded', fn);
   onReady(()=>{ try{ setup(); }catch(e){ console.error('Setup error', e); alert('初期化でエラーが起きたかも。リロードしてね\n'+e.message); } });
 
-  
-// --- small DOM helpers ---
-function option(label, value){ const o=document.createElement('option'); o.textContent=label; o.value=value; return o; }
-const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
   const DEGREE_LABELS = ["1","b2","2","b3","3","4","#4","5","b6","6","b7","7"];
 
   const SCALE_DEFS = {
@@ -203,8 +200,8 @@ const GENRES = {
   const mod=(n,m)=>((n%m)+m)%m;
   const noteIndex=(n)=>NOTES_12.indexOf(n);
 
-  function buildKeyOptions(){ const sel=$("#keySelect"); if(!sel) return; sel.innerHTML=''; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value=sel.value||'C'; }
-  function buildGenreOptions(){ const sel=$("#genreSelect"); if(!sel) return; sel.innerHTML=''; Object.keys(GENRES).forEach(g=>sel.appendChild(option(g,g))); sel.value=sel.value||'メジャー系'; }
+  function buildKeyOptions(){ const sel=$("#keySelect"); if(!sel) return; sel.innerHTML=""; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value=sel.value||"C"; }
+  function buildGenreOptions(){ const sel=$("#genreSelect"); if(!sel) return; sel.innerHTML=""; Object.keys(GENRES).forEach(g=>sel.appendChild(option(g,g))); sel.value=sel.value||"メジャー系"; }
   function populateScalesByGenre(){ const g=$("#genreSelect"); const s=$("#scaleSelect"); if(!g||!s) return; s.innerHTML=""; (GENRES[g.value]||[]).forEach(n=>s.appendChild(option(n,n))); if(!s.value) s.value=s.options[0]?.value||""; }
 
   function getSelectedTensions(){ return $$('.tension:checked').map(el=>el.value); }
