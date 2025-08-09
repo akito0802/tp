@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>スケール指板ビューア</title>
   <link rel="stylesheet" href="style.css" />
+
+<style id="blue-override">
+:root{
+  --blue-1:#e5f4fb; --blue-2:#d0ecf7; --blue-3:#98cfe3; --blue-accent:#048db7;
+  --bg:var(--blue-1); --surface:#ffffff; --panel:var(--blue-2); --panel-2:var(--blue-3);
+  --text:#0b1220; --muted:#3c5363; --accent:var(--blue-accent); --outline:#98cfe3;
+  --root:#ff8f3a; --note:#36b4d6; --tension:#7abfe0; --fret:#b5d7e5; --string:#8fbfd4; --row:#ffffff;
+}
+html,body{ background: var(--bg) !important; }
+header{ background: var(--panel) !important; border-bottom: 1px solid var(--outline) !important; }
+.controls, .tension-panel{ background: var(--panel) !important; border: 1px solid var(--outline) !important; border-radius: 12px !important; }
+.card{ background: var(--row) !important; border: 1px solid var(--outline) !important; }
+select, button{ background: #fff !important; border-color: var(--outline) !important; }
+.badge-root{ background: #fee2c5 !important; color: #7a3e00 !important; }
+.badge-scale{ background: #dbeafe !important; color: #1e40af !important; }
+.badge-tension{ background: #ede9fe !important; color: #5b21b6 !important; }
+</style>
+
 </head>
 <body>
   <header>
