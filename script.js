@@ -127,25 +127,15 @@ const SCALE_THEORY = {
   }
 };
 
-
-// --- Instrument state (guitar|piano) ---
-let INSTRUMENT = (localStorage.getItem("instrument") || "guitar");
-function setInstrument(inst){
-  INSTRUMENT = inst === "piano" ? "piano" : "guitar";
-  localStorage.setItem("instrument", INSTRUMENT);
-  // toggle active class
-  const g=document.getElementById('btnGuitar'), p=document.getElementById('btnPiano');
-  if(g && p){
-    g.classList.toggle('active', INSTRUMENT==='guitar');
-    p.classList.toggle('active', INSTRUMENT==='piano');
-  }
-}
 // v14: clean baseline with robust init, fit-to-width zoom, info label
 (function(){
   const onReady = (fn)=> document.readyState !== 'loading' ? fn() : document.addEventListener('DOMContentLoaded', fn);
   onReady(()=>{ try{ setup(); }catch(e){ console.error('Setup error', e); alert('初期化でエラーが起きたかも。リロードしてね\n'+e.message); } });
 
-  const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  
+// --- small DOM helpers ---
+function option(label, value){ const o=document.createElement('option'); o.textContent=label; o.value=value; return o; }
+const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
   const DEGREE_LABELS = ["1","b2","2","b3","3","4","#4","5","b6","6","b7","7"];
 
   const SCALE_DEFS = {
@@ -213,8 +203,8 @@ const GENRES = {
   const mod=(n,m)=>((n%m)+m)%m;
   const noteIndex=(n)=>NOTES_12.indexOf(n);
 
-  function buildKeyOptions(){ const sel=$("#keySelect"); if(!sel) return; sel.innerHTML=""; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value=sel.value||"C"; }
-  function buildGenreOptions(){ const sel=$("#genreSelect"); if(!sel) return; sel.innerHTML=""; Object.keys(GENRES).forEach(g=>sel.appendChild(option(g,g))); sel.value=sel.value||"メジャー系"; }
+  function buildKeyOptions(){ const sel=$("#keySelect"); if(!sel) return; sel.innerHTML=''; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value=sel.value||'C'; }
+  function buildGenreOptions(){ const sel=$("#genreSelect"); if(!sel) return; sel.innerHTML=''; Object.keys(GENRES).forEach(g=>sel.appendChild(option(g,g))); sel.value=sel.value||'メジャー系'; }
   function populateScalesByGenre(){ const g=$("#genreSelect"); const s=$("#scaleSelect"); if(!g||!s) return; s.innerHTML=""; (GENRES[g.value]||[]).forEach(n=>s.appendChild(option(n,n))); if(!s.value) s.value=s.options[0]?.value||""; }
 
   function getSelectedTensions(){ return $$('.tension:checked').map(el=>el.value); }
@@ -300,91 +290,6 @@ const GENRES = {
       svg.appendChild(t);
     }
 
-    return svg;
-  }
-
-  // --- Piano SVG generator ---
-  function generatePianoSVG(key, scaleName, mode="dots", tensions=[]){
-    const {rootIdx, tSemis, totalSemis, scaleSet} = makeFretboardData(key,scaleName,tensions);
-
-    // Piano geometry: 14 white keys (~2 octaves), start at C (pc 0)
-    const whiteCount = 14;
-    const padL=24, padR=24, padT=24, padB=40;
-    const Ww=28, Wb=18, Hb=70, Hw=140;
-    const gap=1.5;
-    const W = padL + padR + whiteCount*Ww;
-    const H = padT + padB + Hw;
-
-    const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.setAttribute("role","img");
-
-    // Helpers
-    function rect(x,y,w,h,fill){ const r=document.createElementNS("http://www.w3.org/2000/svg","rect"); r.setAttribute("x",x); r.setAttribute("y",y); r.setAttribute("width",w); r.setAttribute("height",h); r.setAttribute("fill",fill); return r; }
-    function circle(cx,cy,r,fill){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",cx); c.setAttribute("cy",cy); c.setAttribute("r",r); c.setAttribute("fill",fill); return c; }
-    function text(x,y,txt){ const t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.textContent=txt; t.setAttribute("x",x); t.setAttribute("y",y); t.setAttribute("class","piano-label"); return t; }
-
-    // Draw white keys
-    const whiteIndices=[0,2,4,5,7,9,11]; // per octave
-    const blackSet=new Set([1,3,6,8,10]);
-    const whitePositions=[]; // store x position per white key number
-    for(let i=0;i<whiteCount;i++){
-      const x=padL + i*Ww;
-      whitePositions.push(x);
-      svg.appendChild(rect(x, padT, Ww-gap, Hw, "#ffffff"));
-      const border=rect(x, padT, Ww-gap, Hw, "none"); border.setAttribute("stroke","#cbd5e1"); svg.appendChild(border);
-    }
-
-    // Draw black keys on top (skip positions with no black key after E/B)
-    const pattern=[0,1,3,4,5]; // positions within 7-white cycle where a black key follows
-    for(let i=0;i<whiteCount;i++){
-      const inCycle=i%7;
-      if(!pattern.includes(inCycle)) continue;
-      const x=whitePositions[i] + (Ww - Wb)/2;
-      svg.appendChild(rect(x, padT, Wb, Hb, "#111827"));
-    }
-
-    function pcOf(semi){ return (semi % 12 + 12) % 12; }
-
-    // Position marker roughly centered over corresponding key
-    function xCenterOfSemi(semi){
-      const pc = pcOf(semi);
-      // map pc -> white index within octave
-      const whiteIndexWithinOctave = [0,0,1,1,2,3,3,4,4,5,5,6][pc];
-      const octave = Math.floor(semi/12);
-      const whiteNumber = octave*7 + whiteIndexWithinOctave;
-      const baseX = whitePositions[whiteNumber] + (Ww-gap)/2;
-      return baseX;
-    }
-
-    const labels = {};
-    for(let semi of totalSemis){
-      if(semi===0){ labels[semi]="R"; }
-      else if(tSemis.includes(semi)){ labels[semi]=SEMI_TO_TENSION[semi]||""; }
-      else { labels[semi]=DEGREE_LABELS[semi]||""; }
-    }
-
-    const markerY = padT + Hb + 26;
-    for(let octave=0; octave<2; octave++){
-      for(let semi of totalSemis){
-        const s = octave*12 + semi;
-        const x = xCenterOfSemi(s);
-        const fill = semi===0 ? "var(--root)" : (tSemis.includes(semi) ? "var(--tension)" : "var(--note)");
-        const dot = circle(x, markerY, 10, fill);
-        svg.appendChild(dot);
-        const t = text(x, markerY, labels[semi]||"");
-        svg.appendChild(t);
-      }
-    }
-
-    // Octave labels
-    for(let i=0;i<=whiteCount;i+=7){
-      const x = padL + i*Ww + 6;
-      const y = padT + Hw + 16;
-      const txt = (i//7)===0 ? "C4" : "C5";
-      const t=text(x,y,txt); t.setAttribute("fill","#475569"); t.setAttribute("font-size","12");
-      svg.appendChild(t);
-    }
     return svg;
   }
 
@@ -513,7 +418,7 @@ const GENRES = {
     const scaleName=$("#scaleSelect").value;
     const mode=$("#displayMode").value;
     const tensions = getSelectedTensions();
-    const svg = (INSTRUMENT==='piano' ? generatePianoSVG(key,scaleName,mode,tensions) : generateSVG(key,scaleName,mode,tensions)); /*__RENDER_SWITCH__*/
+    const svg=generateSVG(key,scaleName,mode,tensions);
     $("#fretboard").replaceWith(svg);
     svg.id="fretboard";
     renderScaleTable(key, scaleName, tensions);
@@ -524,10 +429,7 @@ const GENRES = {
     buildKeyOptions();
     buildGenreOptions();
     populateScalesByGenre();
-    $("#genreSelect").addEventListener('change',()=>{ populateScalesByGenre();     const btnG=document.getElementById("btnGuitar");
-    const btnP=document.getElementById("btnPiano");
-    if(btnG && btnP){ setInstrument(INSTRUMENT); btnG.addEventListener("click", ()=>{ setInstrument("guitar"); render(); }); btnP.addEventListener("click", ()=>{ setInstrument("piano"); render(); }); }
-    render(); });
+    $("#genreSelect").addEventListener('change',()=>{ populateScalesByGenre(); render(); });
     ["#keySelect","#scaleSelect","#displayMode"].forEach(sel=>$(sel).addEventListener('change',render));
     document.getElementById('downloadBtn').addEventListener('click',downloadPNG);
     document.getElementById('tensionClearBtn').addEventListener('click', ()=>{ document.querySelectorAll('.tension').forEach(el=>el.checked=false); render(); });
